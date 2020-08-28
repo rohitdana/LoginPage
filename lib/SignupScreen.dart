@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:login_app/main.dart';
+import 'package:http/http.dart' as http;
 
 class SignupScreen extends StatefulWidget {
   static const routeName = "/signup";
@@ -8,6 +11,8 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  String userName = '';
+  String password = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,13 +31,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               SizedBox(height: 30.0),
-              buildTextField("Name"),
+              buildTextField("userName"),
               SizedBox(height: 25.0),
-              buildTextField("Email"),
-              SizedBox(height: 25.0),
-              buildTextField("Phone Number"),
-              SizedBox(height: 25.0),
-              buildTextField("Password"),
+              buildTextField("password"),
               SizedBox(
                 height: 80.0,
               ),
@@ -77,6 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Widget buildTextField(String hintText) {
     return TextField(
+      onChanged: (value) => {hintText = value},
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
@@ -95,7 +97,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget buildButtonContaner() {
     return InkWell(
       onTap: () {
-        Navigator.of(context).pop(LoginPage());
+        signup(userName, password);
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -115,6 +117,22 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  signup(username, password) {
+    var response = createUser(username, password);
+    response.then((value) => debugPrint(value.body));
+  }
+
+  Future<http.Response> createUser(username, password) {
+    return http.post(
+      'https://fakerestapi.azurewebsites.net/api/Users',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(
+          <String, String>{'UserName': username, 'Password': password}),
     );
   }
 }
